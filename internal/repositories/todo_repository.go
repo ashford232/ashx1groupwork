@@ -17,14 +17,61 @@ func CreateTodo(pool *pgxpool.Pool, input *types.CreateTodoRequest, user_id stri
 	defer cancel()
 
 	query := `
-		INSERT INTO todos(id, title, description, is_completed, user_id, due_at, priority)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, title, description, is_completed, user_id, is_deleted, created_at, updated_at, due_at, priority
-	`
+	INSERT INTO todos (
+		id,
+		title,
+		description,
+		is_completed,
+		user_id,
+		due_at,
+		priority
+	)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
+	ON CONFLICT (id)
+	DO UPDATE SET
+		title = EXCLUDED.title,
+		description = EXCLUDED.description,
+		is_completed = EXCLUDED.is_completed,
+		due_at = EXCLUDED.due_at,
+		priority = EXCLUDED.priority,
+		updated_at = NOW()
+	RETURNING
+		id,
+		title,
+		description,
+		is_completed,
+		user_id,
+		is_deleted,
+		created_at,
+		updated_at,
+		due_at,
+		priority
+`
 
 	var todo models.Todo
 
-	err := pool.QueryRow(ctx, query, input.ID, input.Title, input.Description, input.Completed, user_id, input.DueAt, input.Priority).Scan(&todo.ID, &todo.Title, &todo.Description, &todo.IsCompleted, &todo.UserId, &todo.CreatedAt, &todo.UpdatedAt, &todo.DueAt, &todo.Priority)
+	err := pool.QueryRow(
+		ctx,
+		query,
+		input.ID,
+		input.Title,
+		input.Description,
+		input.Completed,
+		user_id,
+		input.DueAt,
+		input.Priority,
+	).Scan(
+		&todo.ID,          // id
+		&todo.Title,       // title
+		&todo.Description, // description
+		&todo.IsCompleted, // is_completed
+		&todo.UserId,      // user_id
+		&todo.IsDeleted,   // is_deleted
+		&todo.CreatedAt,   // created_at
+		&todo.UpdatedAt,   // updated_at
+		&todo.DueAt,       // due_at
+		&todo.Priority,    // priority
+	)
 	if err != nil {
 		return nil, err
 	}

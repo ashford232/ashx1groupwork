@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS todos (
 
     user_id UUID NOT NULL,
 
-    completed BOOLEAN DEFAULT FALSE,
+    is_completed BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE,
 
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
@@ -83,7 +84,7 @@ CREATE TABLE IF NOT EXISTS notes(
     user_id UUID NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,  
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP  ,
-
+ is_deleted BOOLEAN DEFAULT FALSE,
     CONSTRAINT fk_notes_user
         FOREIGN KEY (user_id)
         REFERENCES users(id)
@@ -117,6 +118,7 @@ CREATE TABLE IF NOT EXISTS docs(
     mime_type VARCHAR(100),
     size INTEGER,
     user_id UUID NOT NULL,
+     is_deleted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,  
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP  ,
 
